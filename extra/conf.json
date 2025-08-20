@@ -1,0 +1,6 @@
+{
+"name": "extra_data",
+"url": "http://192.168.0.9",
+"apikey":  "your_api_key_for_extra_data",
+"dataids_for_camera": [10001110, 10001210]
+}
