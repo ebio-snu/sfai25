@@ -11,7 +11,8 @@ async def main():
     """
     # Load configuration from conf.json
     try:
-        with open("./conf.json") as f:
+        conf_path = "conf.json"
+        with open(conf_path) as f:
             config = json.load(f)
     except FileNotFoundError:
         print("Error: conf.json not found. Please make sure the configuration file exists.")
@@ -48,6 +49,14 @@ async def main():
                 print(f"Error getting image for data_id {data_id}: {e}")
     else:
         print("No dataids_for_camera found in the configuration file.")
+
+    # Test post_heartbeats
+    try:
+        print("Posting heartbeat...")
+        await client.post_heartbeats("This is a test heartbeat.")
+        print("Heartbeat posted successfully.")
+    except Exception as e:
+        print(f"Error posting heartbeat: {e}")
 
 if __name__ == "__main__":
     # To run this sample, you would typically execute `python sample.py` in your terminal.

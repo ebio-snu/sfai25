@@ -113,3 +113,17 @@ class ExtraClient:
             error_msg = f"Failed to decode JSON from response. Status code: {response.status_code}, Response text: {response.text}"
             logging.error(error_msg)
             raise e
+
+    async def post_heartbeats(self, content: str):
+        """Post a heartbeat to the API.
+
+        Args:
+            content: The content of the heartbeat.
+
+        Returns:
+            The response from the API.
+        """
+        endpoint = "/heartbeats"
+        data = {"content": content}
+        response = await self._make_request("POST", endpoint, json=data)
+        return response
