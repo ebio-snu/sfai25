@@ -7,12 +7,17 @@
 #
 import time
 import struct
+import json
 from pymodbus.client import ModbusTcpClient
 from ksconstants import STATCODE, CMDCODE, PRIVCODE
 
+# Load configuration
+with open('conf.json', 'r') as f:
+    config = json.load(f)
+
 opid = 1
 idx = 36
-client = ModbusTcpClient("192.168.0.10", port=502)
+client = ModbusTcpClient(config['modbus_ip'], port=config['modbus_port'])
 client.connect()
 
 def getcommand(cmd):

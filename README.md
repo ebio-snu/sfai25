@@ -17,6 +17,7 @@ extra 폴더는 비표준 인터페이스에 대한 샘플입니다.
 │   └── forecasts/
 │       └── forecast.json: 기상 예보 데이터 예시 (기상청 OPENAPI 참고)
 ├── KSB7958/
+│   ├── conf.json: 설정 파일
 │   ├── ksconstants.py: 프로젝트에서 사용하는 상수
 │   ├── control_priv.py: 제어권 변경 샘플 (대회에서 사용할 필요는 없음)
 │   ├── nutsupply.py: 양액공급기 제어
@@ -62,6 +63,7 @@ extra 폴더는 비표준 인터페이스에 대한 샘플입니다.
 ## 설정
 
 extra 폴더의 설정은 `extra/conf.json` 파일에서 변경할 수 있습니다.
+KSB7958 폴더의 설정은 `KSB7958/conf.json` 파일에서 변경할 수 있습니다.
 
 ## 라이선스
 

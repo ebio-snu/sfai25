@@ -7,13 +7,18 @@
 #
 
 import struct
+import json
 from pymodbus.client import ModbusTcpClient
 from ksconstants import STATCODE, CMDCODE, PRIVCODE
 
 def getobservation(reg1, reg2):
     return struct.unpack('f', struct.pack('HH', reg1, reg2))[0]
 
-client = ModbusTcpClient("192.168.0.10", port=502)
+# Load configuration
+with open('conf.json', 'r') as f:
+    config = json.load(f)
+
+client = ModbusTcpClient(config['modbus_ip'], port=config['modbus_port'])
 client.connect()
 
 # 2번 유닛아이디 203번지부터 3개의 레지스터를 읽습니다. (외부 온도)

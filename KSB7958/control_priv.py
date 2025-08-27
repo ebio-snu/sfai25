@@ -7,12 +7,17 @@
 #
 
 import time
+import json
 from pymodbus.client import ModbusTcpClient
 from ksconstants import STATCODE, CMDCODE, PRIVCODE
 
+# Load configuration
+with open('conf.json', 'r') as f:
+    config = json.load(f)
+
 # 슬레이브 5는 양액기 노드
 slave = 5
-client = ModbusTcpClient("192.168.0.10", port=502)
+client = ModbusTcpClient(config['modbus_ip'], port=config['modbus_port'])
 client.connect()
 
 def readcontrol(client, slave):
