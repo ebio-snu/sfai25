@@ -50,10 +50,10 @@ async def main():
     else:
         print("No dataids_for_camera found in the configuration file.")
 
-    # Test post_heartbeats
+    # Test post_heartbeat
     try:
         print("Posting heartbeat...")
-        await client.post_heartbeats("This is a test heartbeat.")
+        await client.post_heartbeat("This is a test heartbeat.")
         print("Heartbeat posted successfully.")
     except Exception as e:
         print(f"Error posting heartbeat: {e}")

@@ -114,7 +114,7 @@ class ExtraClient:
             logging.error(error_msg)
             raise e
 
-    async def post_heartbeats(self, content: str):
+    async def post_heartbeat(self, content: str):
         """Post a heartbeat to the API.
 
         Args:
@@ -123,7 +123,7 @@ class ExtraClient:
         Returns:
             The response from the API.
         """
-        endpoint = "/heartbeats"
+        endpoint = "/heartbeat"
         data = {"content": content}
         response = await self._make_request("POST", endpoint, json=data)
         return response
