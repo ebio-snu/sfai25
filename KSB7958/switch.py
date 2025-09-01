@@ -16,7 +16,7 @@ with open('conf.json', 'r') as f:
     config = json.load(f)
 
 opid = 1
-idx = 4
+idx = 3
 client = ModbusTcpClient(config['modbus_ip'], port=config['modbus_port'])
 client.connect()
 
