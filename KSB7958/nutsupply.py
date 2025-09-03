@@ -135,3 +135,9 @@ for _ in range(1, 40):
     readstatus(True)
     time.sleep(1)
 #"""
+
+# 종료 확인 
+sendcommand (CMDCODE.OFF)
+time.sleep(5) # 잠시 대기
+readstatus()
+

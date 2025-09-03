@@ -16,7 +16,7 @@ with open('conf.json', 'r') as f:
     config = json.load(f)
 
 opid = 1
-idx = 3
+idx = 3 + 4*3
 client = ModbusTcpClient(config['modbus_ip'], port=config['modbus_port'])
 client.connect()
 
@@ -53,6 +53,7 @@ def readstatus(readtime = False):
     global opid, idx, client
     reg = client.read_holding_registers(200 + idx, count=4, device_id=4)
     if not reg.isError():
+        print (reg.registers)
         if reg.registers[0] == opid:
             print ("OPID {0} 번 명령으로 {1} 입니다.".format(opid, getstatus(reg.registers[1])))
             if reg.registers[1] != 0 and readtime:
@@ -65,7 +66,7 @@ def readstatus(readtime = False):
 
 # Initialize
 sendcommand (CMDCODE.OFF)
-time.sleep(1) # 잠시 대기
+time.sleep(5) # 잠시 대기
 readstatus()
 
 # ON
@@ -77,14 +78,19 @@ for _ in range(1, 10):
 
 # OFF
 sendcommand (CMDCODE.OFF)
-time.sleep(1) # 잠시 대기
+time.sleep(5) # 잠시 대기
 readstatus()
 
 # TIMED ON - 10 초 작동
 sendcommand (CMDCODE.TIMED_ON, 10)
-time.sleep(1) # 작동 여부 확인전에 잠시 대기
+time.sleep(5) # 작동 여부 확인전에 잠시 대기
 for _ in range(1, 10):
     readstatus(True)
     time.sleep(1)
 
+
+# 종료 확인
+sendcommand (CMDCODE.OFF)
+time.sleep(5) # 잠시 대기
+readstatus()
 

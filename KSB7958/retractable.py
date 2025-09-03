@@ -16,7 +16,7 @@ with open('conf.json', 'r') as f:
     config = json.load(f)
 
 opid = 1
-idx = 36
+idx = 67
 client = ModbusTcpClient(config['modbus_ip'], port=config['modbus_port'])
 client.connect()
 
@@ -67,7 +67,7 @@ def readstatus(readtime = False):
 
 # Initialize
 sendcommand (CMDCODE.OFF)
-time.sleep(1) # 잠시 대기
+time.sleep(5) # 잠시 대기
 readstatus()
 
 # OPEN
@@ -78,7 +78,7 @@ for _ in range(1, 10):
 
 # OFF
 sendcommand (CMDCODE.OFF)
-time.sleep(1) # 잠시 대기
+time.sleep(5) # 잠시 대기
 readstatus()
 
 # CLOSE
@@ -89,7 +89,7 @@ for _ in range(1, 10):
 
 # OFF
 sendcommand (CMDCODE.OFF)
-time.sleep(1) # 잠시 대기
+time.sleep(5) # 잠시 대기
 readstatus()
 
 # TIMED OPEN - 10 초 작동
@@ -103,4 +103,9 @@ sendcommand (CMDCODE.TIMED_CLOSE, 10)
 for _ in range(1, 15):
     time.sleep(1) # 작동 여부 확인전에 잠시 대기
     readstatus(True)
+
+# 종료확인 
+sendcommand (CMDCODE.OFF)
+time.sleep(5) # 잠시 대기
+readstatus()
 
