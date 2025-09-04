@@ -1,6 +1,6 @@
 {
 "name": "extra_data",
-"url": "http://192.168.0.9:8000",
+"url": "http://192.168.0.10:8000",
 "apikey":  "e108d11a-937a-4e2a-b93c-e87eedae988e",
 "dataids_for_camera": [10003210, 10003310]
 }
