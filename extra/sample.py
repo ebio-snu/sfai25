@@ -1,7 +1,7 @@
 import asyncio
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from client import ExtraClient
 
 async def main():
@@ -46,9 +46,14 @@ async def main():
                 print(f"Getting image for data_id: {data_id}...")
                 result = await client.get_image(data_id=data_id)
                 print(f"Image for data_id {data_id} received and saved to {result['image_path']}")
-                print(f"Image metadata: {json.dumps(result['metadata'], indent=2)}")
+                print(f"Image filename: {result['filename']}")
             except Exception as e:
-                print(f"Error getting image for data_id {data_id}: {e}")
+                if "404" in str(e) or "No image found" in str(e):
+                    print(f"No image found for data_id {data_id} (this is expected if no images are uploaded yet)")
+                elif "400" in str(e) or "Invalid image path" in str(e):
+                    print(f"Invalid image path for data_id {data_id} (database entry exists but file is missing)")
+                else:
+                    print(f"Error getting image for data_id {data_id}: {e}")
     else:
         print("No dataids_for_camera found in the configuration file.")
 
@@ -67,7 +72,7 @@ async def main():
     # Test post_target
     try:
         print("Posting target...")
-        current_time = datetime.now().isoformat(timespec='seconds')
+        target_time = (datetime.now() + timedelta(minutes=10)).isoformat(timespec='seconds')
         target_payload = [
             {
                 "farm_id": 1,
@@ -75,7 +80,7 @@ async def main():
                 "humidity": 65.0,
                 "CO2": 800.0,
                 "VPD": 1.2,
-                "targettime": current_time
+                "targettime": target_time
             }
         ]
         response = await client.post_target(target_payload)

@@ -3,8 +3,6 @@ import json
 import logging
 import os
 from typing import Dict, Any, List
-from email.message import EmailMessage
-from email import message_from_bytes
 
 class ExtraClient:
     def __init__(self, config: Dict[str, Any]):
@@ -67,55 +65,40 @@ class ExtraClient:
 
         response = await self._make_request("GET", endpoint, params=params)
         
-        # Parse multipart response using email library
-        try:
-            content_type = response.headers.get('content-type', '')
-            if 'multipart/form-data' not in content_type:
-                raise ValueError(f"Expected multipart/form-data response, got {content_type}")
-            
-            # Parse multipart content
-            msg = message_from_bytes(b'Content-Type: ' + content_type.encode() + b'\r\n\r\n' + response.content)
-            
-            metadata = None
-            image_data = None
-            image_filename = None
-            
-            for part in msg.walk():
-                if part.get_content_maintype() == 'multipart':
-                    continue
-                    
-                content_disposition = part.get('Content-Disposition', '')
-                
-                if 'name="metadata"' in content_disposition:
-                    metadata = json.loads(part.get_payload())
-                elif 'name="image"' in content_disposition:
-                    image_data = part.get_payload(decode=True)
-                    # Extract filename from content-disposition
-                    if 'filename=' in content_disposition:
-                        filename_part = content_disposition.split('filename=')[1].strip().strip('"')
-                        image_filename = filename_part
-            
-            if not metadata or not image_data:
-                raise ValueError("Could not find metadata or image data in multipart response")
-                
-        except Exception as e:
-            logging.error(f"Failed to parse multipart response: {e}")
-            raise
-
-        # Save image to file using original filename or from metadata
-        filename = image_filename or os.path.basename(metadata.get('path', f'image_{data_id}.png'))
+        # The response is now directly the image data
+        image_data = response.content
+        
+        # Extract filename from Content-Disposition header if available
+        content_disposition = response.headers.get('content-disposition', '')
+        if 'filename=' in content_disposition:
+            filename_part = content_disposition.split('filename=')[1].strip().strip('"')
+            filename = filename_part
+        else:
+            # Generate filename from data_id and content type
+            content_type = response.headers.get('content-type', 'image/png')
+            ext = '.png'  # default
+            if 'jpeg' in content_type:
+                ext = '.jpg'
+            elif 'gif' in content_type:
+                ext = '.gif'
+            elif 'bmp' in content_type:
+                ext = '.bmp'
+            elif 'webp' in content_type:
+                ext = '.webp'
+            filename = f"image_{data_id}{ext}"
+        
         image_path = f"images/{filename}"
         
         # Create images directory if it doesn't exist
         os.makedirs("images", exist_ok=True)
         
+        # Save image to file
         with open(image_path, "wb") as f:
             f.write(image_data)
             
         print(f"Image saved to: {image_path}")
-        print(f"Metadata: {json.dumps(metadata, indent=2)}")
-
-        return {"metadata": metadata, "image_path": image_path, "image_data": image_data}
+        
+        return {"image_path": image_path, "image_data": image_data, "filename": filename}
 
     async def get_forecast(self):
         """Get the forecast from the API.
