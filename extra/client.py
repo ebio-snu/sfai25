@@ -1,15 +1,16 @@
 import httpx
 import json
 import logging
+import os
 from typing import Dict, Any, List
-from multipart import MultipartParser
-import io
+from email.message import EmailMessage
+from email import message_from_bytes
 
 class ExtraClient:
     def __init__(self, config: Dict[str, Any]):
         self.name = config.get("name")
         self.base_url = config.get("url")
-        self.apikey = config.get("apikey", {})
+        self.apikey = config.get("apikey")
         self.dataids = config.get("dataids_for_camera", [])
 
     async def _make_request(self, method: str, endpoint: str, **kwargs):
@@ -66,33 +67,55 @@ class ExtraClient:
 
         response = await self._make_request("GET", endpoint, params=params)
         
-        # Parse multipart response
+        # Parse multipart response using email library
         try:
-            parser = MultipartParser(io.BytesIO(response.content), response.headers['Content-Type'])
-            parts = parser.get_parts()
+            content_type = response.headers.get('content-type', '')
+            if 'multipart/form-data' not in content_type:
+                raise ValueError(f"Expected multipart/form-data response, got {content_type}")
             
-            if len(parts) != 2:
-                raise ValueError(f"Expected 2 parts in multipart response, but got {len(parts)}")
-
-            metadata_part = parts[0]
-            image_part = parts[1]
-
-            if metadata_part.headers.get(b'Content-Type') != b'application/json':
-                raise ValueError(f"Expected first part to be application/json, but got {metadata_part.headers.get(b'Content-Type')}")
-
-            metadata = json.loads(metadata_part.get_payload())
-            image_data = image_part.get_payload()
+            # Parse multipart content
+            msg = message_from_bytes(b'Content-Type: ' + content_type.encode() + b'\r\n\r\n' + response.content)
+            
+            metadata = None
+            image_data = None
+            image_filename = None
+            
+            for part in msg.walk():
+                if part.get_content_maintype() == 'multipart':
+                    continue
+                    
+                content_disposition = part.get('Content-Disposition', '')
+                
+                if 'name="metadata"' in content_disposition:
+                    metadata = json.loads(part.get_payload())
+                elif 'name="image"' in content_disposition:
+                    image_data = part.get_payload(decode=True)
+                    # Extract filename from content-disposition
+                    if 'filename=' in content_disposition:
+                        filename_part = content_disposition.split('filename=')[1].strip().strip('"')
+                        image_filename = filename_part
+            
+            if not metadata or not image_data:
+                raise ValueError("Could not find metadata or image data in multipart response")
+                
         except Exception as e:
             logging.error(f"Failed to parse multipart response: {e}")
             raise
 
-        # Save image to file
-        image_path = metadata.get('path')
-        if image_path:
-            with open(image_path, "wb") as f:
-                f.write(image_data)
+        # Save image to file using original filename or from metadata
+        filename = image_filename or os.path.basename(metadata.get('path', f'image_{data_id}.png'))
+        image_path = f"images/{filename}"
+        
+        # Create images directory if it doesn't exist
+        os.makedirs("images", exist_ok=True)
+        
+        with open(image_path, "wb") as f:
+            f.write(image_data)
+            
+        print(f"Image saved to: {image_path}")
+        print(f"Metadata: {json.dumps(metadata, indent=2)}")
 
-        return response.content
+        return {"metadata": metadata, "image_path": image_path, "image_data": image_data}
 
     async def get_forecast(self):
         """Get the forecast from the API.
@@ -136,24 +159,26 @@ class ExtraClient:
         response = await self._make_request("POST", endpoint, json=data)
         return response
 
-    async def post_target(self, target_data: Dict[str, Any]):
+    async def post_target(self, target_data: List[Dict[str, Any]]):
         """Post new target settings to the API.
 
         Args:
-            target_data: A dictionary, each representing a target setting.
+            target_data: A list of dictionaries, each representing a target setting.
                          Example: 
-                             {
-                                 "farm_id": 1,
-                                 "temperature": 25.5,
-                                 "humidity": 65.0,
-                                 "CO2": 800.0,
-                                 "VPD": 1.2,
-                                 "targettime": "2025-01-15T15:30:00"
-                             }
+                             [
+                                 {
+                                     "farm_id": 1,
+                                     "temperature": 25.5,
+                                     "humidity": 65.0,
+                                     "CO2": 800.0,
+                                     "VPD": 1.2,
+                                     "targettime": "2025-01-15T15:30:00"
+                                 }
+                             ]
 
         Returns:
             The response from the API.
         """
         endpoint = "/target"
-        response = await self._make_request("POST", endpoint, json=[target_data])
+        response = await self._make_request("POST", endpoint, json=target_data)
         return response

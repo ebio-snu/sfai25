@@ -44,8 +44,9 @@ async def main():
         for data_id in client.dataids:
             try:
                 print(f"Getting image for data_id: {data_id}...")
-                await client.get_image(data_id=data_id)
-                print(f"Image for data_id {data_id} received and saved.")
+                result = await client.get_image(data_id=data_id)
+                print(f"Image for data_id {data_id} received and saved to {result['image_path']}")
+                print(f"Image metadata: {json.dumps(result['metadata'], indent=2)}")
             except Exception as e:
                 print(f"Error getting image for data_id {data_id}: {e}")
     else:
@@ -54,10 +55,12 @@ async def main():
     # Test post_heartbeat
     try:
         print("Posting heartbeat...")
-        await client.post_heartbeat(
-            content="This is a test heartbeat. : " + str(datetime.now().isoformat(timespec='seconds'))
+        response = await client.post_heartbeat(
+            content="This is a test heartbeat from extra client: " + str(datetime.now().isoformat(timespec='seconds'))
         )
-        print("Heartbeat posted successfully.")
+        print(f"Heartbeat posted successfully. Status: {response.status_code}")
+        if response.status_code == 200:
+            print(f"Response: {response.json()}")
     except Exception as e:
         print(f"Error posting heartbeat: {e}")
 
@@ -75,8 +78,10 @@ async def main():
                 "targettime": current_time
             }
         ]
-        await client.post_target(target_payload)
-        print("Target posted successfully.")
+        response = await client.post_target(target_payload)
+        print(f"Target posted successfully. Status: {response.status_code}")
+        if response.status_code == 200:
+            print(f"Response: {response.json()}")
     except Exception as e:
         print(f"Error posting target: {e}")
 
