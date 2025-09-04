@@ -38,4 +38,4 @@ class STATCODE:
 class PRIVCODE:
     LOCAL = 1
     REMOTE = 2
-    MANULAL = 3
+    MANUAL = 3

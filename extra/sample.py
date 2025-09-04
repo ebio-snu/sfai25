@@ -53,10 +53,31 @@ async def main():
     # Test post_heartbeat
     try:
         print("Posting heartbeat...")
-        await client.post_heartbeat("This is a test heartbeat.")
+        await client.post_heartbeat(
+            content="This is a test heartbeat. : " + str(datetime.now().isoformat(timespec='seconds'))
+        )
         print("Heartbeat posted successfully.")
     except Exception as e:
         print(f"Error posting heartbeat: {e}")
+
+    # Test post_target
+    try:
+        print("Posting target...")
+        current_time = datetime.now().isoformat(timespec='seconds')
+        target_payload = [
+            {
+                "farm_id": 1,
+                "temperature": 25.5,
+                "humidity": 65.0,
+                "CO2": 800.0,
+                "VPD": 1.2,
+                "targettime": current_time
+            }
+        ]
+        await client.post_target(target_payload)
+        print("Target posted successfully.")
+    except Exception as e:
+        print(f"Error posting target: {e}")
 
 if __name__ == "__main__":
     # To run this sample, you would typically execute `python sample.py` in your terminal.

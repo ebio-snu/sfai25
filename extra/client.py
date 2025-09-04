@@ -103,8 +103,6 @@ class ExtraClient:
         endpoint = "/forecast"
         response = await self._make_request("GET", endpoint)
         try:
-            # The response is a string representation of a dict, not a valid JSON.
-            # Using ast.literal_eval to safely parse it.
             forecast_data = json.loads(response.text)
             with open("forecasts/forecast.json", "w") as f:
                 json.dump(forecast_data, f, indent=4)
@@ -114,16 +112,48 @@ class ExtraClient:
             logging.error(error_msg)
             raise e
 
-    async def post_heartbeat(self, content: str):
+    async def post_heartbeat(self, content: str, farm_id: int = 1, category: str = "ai", created_time: str = None):
         """Post a heartbeat to the API.
 
         Args:
             content: The content of the heartbeat.
+            farm_id: The ID of the farm. Defaults to 1.
+            category: The component category. Defaults to "ai".
+            created_time: The creation time of the heartbeat. Defaults to current time if None.
 
         Returns:
             The response from the API.
         """
         endpoint = "/heartbeat"
-        data = {"content": content}
+        data = {
+            "farm_id": farm_id,
+            "category": category,
+            "content": content
+        }
+        if created_time:
+            data["created_time"] = created_time
+
         response = await self._make_request("POST", endpoint, json=data)
+        return response
+
+    async def post_target(self, target_data: Dict[str, Any]):
+        """Post new target settings to the API.
+
+        Args:
+            target_data: A dictionary, each representing a target setting.
+                         Example: 
+                             {
+                                 "farm_id": 1,
+                                 "temperature": 25.5,
+                                 "humidity": 65.0,
+                                 "CO2": 800.0,
+                                 "VPD": 1.2,
+                                 "targettime": "2025-01-15T15:30:00"
+                             }
+
+        Returns:
+            The response from the API.
+        """
+        endpoint = "/target"
+        response = await self._make_request("POST", endpoint, json=[target_data])
         return response
