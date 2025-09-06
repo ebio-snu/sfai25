@@ -112,6 +112,7 @@ time.sleep(5) # 잠시 대기
 readstatus()
 
 # 1회 관수 : ONCE_WATER : Not USE : 대회를 위해서 적절한 명령이 아니기 때문에 사용하지 않습니다.
+"""
 sendcommand (CMDCODE.ONCE_WATER)
 for _ in range(1, 10):
     readstatus(True)
@@ -119,6 +120,7 @@ for _ in range(1, 10):
 sendcommand (CMDCODE.OFF)
 time.sleep(5) # 잠시 대기
 readstatus()
+"""
 
 #"""
 # 원수 관수 : JUST_WATER : 맹물을 관수합니다.
