@@ -85,7 +85,7 @@ class RetractableTester:
 
         # OPEN
         self.send_command(CMDCODE.OPEN)
-        for _ in range(1, 10):
+        for _ in range(1, 20):
             time.sleep(1)
             self.read_status()
 
@@ -96,7 +96,7 @@ class RetractableTester:
 
         # CLOSE
         self.send_command(CMDCODE.CLOSE)
-        for _ in range(1, 10):
+        for _ in range(1, 20):
             time.sleep(1)
             self.read_status()
 
@@ -105,15 +105,26 @@ class RetractableTester:
         time.sleep(5)
         self.read_status()
 
-        # TIMED OPEN - 10 초 작동
-        self.send_command(CMDCODE.TIMED_OPEN, 10)
-        for _ in range(1, 15):
+        # TIMED OPEN - 20 초 작동
+        self.send_command(CMDCODE.TIMED_OPEN, 20)
+        for _ in range(1, 25):
             time.sleep(1)
             self.read_status(True)
 
-        # TIMED CLOSE - 10 초 작동
-        self.send_command(CMDCODE.TIMED_CLOSE, 10)
-        for _ in range(1, 15):
+        # TIMED CLOSE - 20 초 작동
+        self.send_command(CMDCODE.TIMED_CLOSE, 20)
+        for _ in range(1, 25):
+            time.sleep(1)
+            self.read_status(True)
+
+        # SET POSITION
+        self.send_command(CMDCODE.SET_POSITION, pos=5)
+        for _ in range(1, 25):
+            time.sleep(1)
+            self.read_status(True)
+
+        self.send_command(CMDCODE.SET_POSITION, pos=0)
+        for _ in range(1, 25):
             time.sleep(1)
             self.read_status(True)
 
