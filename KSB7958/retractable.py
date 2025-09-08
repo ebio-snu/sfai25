@@ -25,16 +25,28 @@ class RetractableTester:
             CMDCODE.OPEN: "열림",
             CMDCODE.CLOSE: "닫힘",
             CMDCODE.TIMED_OPEN: "시간열림",
-            CMDCODE.TIMED_CLOSE: "시간닫힘"
+            CMDCODE.TIMED_CLOSE: "시간닫힘",
+            CMDCODE.SET_POSITION: "위치지정"
         }
         return ctbl.get(cmd, "없는 명령")
 
-    def send_command(self, cmd, sec=None):
+    def send_command(self, cmd, sec=None, pos=None):
         self.opid += 1
         reg = [cmd, self.opid]
 
-        if sec is not None:
-            reg.extend(struct.unpack('HH', struct.pack('i', sec)))
+        if cmd in (CMDCODE.TIMED_OPEN, CMDCODE.TIMED_CLOSE):
+            if sec is not None:
+                reg.extend(struct.unpack('HH', struct.pack('i', sec)))
+            else:
+                print(f"{self.get_command_name(cmd)} 명령은 시간을 필요로 합니다.")
+                return
+
+        if cmd in (CMDCODE.POSITION):
+            if pos is not None:
+                reg.extend([0, 0, pos])
+            else:
+                print(f"{self.get_command_name(cmd)} 명령은 위치를 필요로 합니다.")
+                return
 
         print(f"{self.get_command_name(cmd)} 명령을 전송합니다. {reg}")
         self.client.write_registers(500 + self.idx, reg, device_id=4)
@@ -51,7 +63,7 @@ class RetractableTester:
         return struct.unpack('i', struct.pack('HH', reg1, reg2))[0]
 
     def read_status(self, readtime=False):
-        reg = self.client.read_holding_registers(200 + self.idx, count=4, device_id=4)
+        reg = self.client.read_holding_registers(200 + self.idx, count=5, device_id=4)
         if not reg.isError():
             if reg.registers[0] == self.opid:
                 print(f"OPID {self.opid} 번 명령으로 {self.get_status_name(reg.registers[1])} 입니다.")
@@ -64,7 +76,7 @@ class RetractableTester:
 
     def run_single_test(self, devidx, devname):
         print(f"\n===== {devname}({devidx}) 장비 테스트 시작 =====\n")
-        self.idx = 67 + 4 * devidx
+        self.idx = 67 + 5 * devidx
 
         # Initialize
         self.send_command(CMDCODE.OFF)
