@@ -41,7 +41,7 @@ class RetractableTester:
                 print(f"{self.get_command_name(cmd)} 명령은 시간을 필요로 합니다.")
                 return
 
-        if cmd in (CMDCODE.POSITION):
+        if cmd == CMDCODE.SET_POSITION:
             if pos is not None:
                 reg.extend([0, 0, pos])
             else:
@@ -66,7 +66,7 @@ class RetractableTester:
         reg = self.client.read_holding_registers(200 + self.idx, count=5, device_id=4)
         if not reg.isError():
             if reg.registers[0] == self.opid:
-                print(f"OPID {self.opid} 번 명령으로 {self.get_status_name(reg.registers[1])} 입니다.")
+                print(f"OPID {self.opid} 번 명령으로 {self.get_status_name(reg.registers[1])} 입니다. 개도율은 {reg.registers[4]} 입니다.")
                 if reg.registers[1] != 0 and readtime:
                     print(f"작동 남은 시간은 {self.get_remain_time(reg.registers[2], reg.registers[3])} 입니다.")
             else:
