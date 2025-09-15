@@ -19,8 +19,8 @@ class CMDCODE:
     TIMED_CLOSE = 304
     SET_POSITION = 305
 
-    ONCE_WATER = 401        # 대회를 위해서 적절한 명령이 아니라 사용을 권장하지 않습니다.
-    JUST_WATER = 402
+    ONCE_WATER = 401    # 대회에서 사용되지 않습니다.
+    JUST_WATER = 402    # 대회에서 사용되지 않습니다.
     NUT_WATER = 403
 
 class STATCODE:
